@@ -143,7 +143,6 @@ export default class UI extends Module<UINodes> {
     this.loadStyles();
   }
 
-
   /**
    * Toggle read-only state
    *
@@ -245,6 +244,15 @@ export default class UI extends Module<UINodes> {
     InlineToolbar.close();
     Toolbar.toolbox.close();
   }
+
+  /**
+   * Event listener for 'mousedown' and 'touchstart' events
+   *
+   * @param event - TouchEvent or MouseEvent
+   */
+  private documentTouchedListener = (event: Event): void => {
+    this.documentTouched(event);
+  };
 
   /**
    * Check for mobile mode and save the result
@@ -353,6 +361,16 @@ export default class UI extends Module<UINodes> {
     this.listeners.on(window, 'resize', this.resizeDebouncer, {
       passive: true,
     });
+
+    this.listeners.on(this.nodes.redactor, 'mousedown', this.documentTouchedListener, {
+      capture: true,
+      passive: true,
+    });
+
+    this.listeners.on(this.nodes.redactor, 'touchstart', this.documentTouchedListener, {
+      capture: true,
+      passive: true,
+    });
   }
 
   /**
@@ -361,6 +379,8 @@ export default class UI extends Module<UINodes> {
   private unbindReadOnlyInsensitiveListeners(): void {
     this.listeners.off(document, 'selectionchange', this.selectionChangeDebounced);
     this.listeners.off(window, 'resize', this.resizeDebouncer);
+    this.listeners.off(this.nodes.redactor, 'mousedown', this.documentTouchedListener);
+    this.listeners.off(this.nodes.redactor, 'touchstart', this.documentTouchedListener);
   }
 
 
@@ -371,20 +391,6 @@ export default class UI extends Module<UINodes> {
     this.readOnlyMutableListeners.on(this.nodes.redactor, 'click', (event: MouseEvent) => {
       this.redactorClicked(event);
     }, false);
-
-    this.readOnlyMutableListeners.on(this.nodes.redactor, 'mousedown', (event: MouseEvent | TouchEvent) => {
-      this.documentTouched(event);
-    }, {
-      capture: true,
-      passive: true,
-    });
-
-    this.readOnlyMutableListeners.on(this.nodes.redactor, 'touchstart', (event: MouseEvent | TouchEvent) => {
-      this.documentTouched(event);
-    }, {
-      capture: true,
-      passive: true,
-    });
 
     this.readOnlyMutableListeners.on(document, 'keydown', (event: KeyboardEvent) => {
       this.documentKeydown(event);
@@ -711,17 +717,17 @@ export default class UI extends Module<UINodes> {
    * - Move and show the Toolbar
    * - Set a Caret
    *
-   * @param {MouseEvent | TouchEvent} event - touch or mouse event
+   * @param event - touch or mouse event
    */
-  private documentTouched(event: MouseEvent | TouchEvent): void {
+  private documentTouched(event: Event): void {
     let clickedNode = event.target as HTMLElement;
 
     /**
      * If click was fired on Editor`s wrapper, try to get clicked node by elementFromPoint method
      */
     if (clickedNode === this.nodes.redactor) {
-      const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
-      const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+      const clientX = event instanceof MouseEvent ? event.clientX : (event as TouchEvent).touches[0].clientX;
+      const clientY = event instanceof MouseEvent ? event.clientY : (event as TouchEvent).touches[0].clientY;
 
       clickedNode = document.elementFromPoint(clientX, clientY) as HTMLElement;
     }
@@ -744,7 +750,9 @@ export default class UI extends Module<UINodes> {
      * Move and open toolbar
      * (used for showing Block Settings toggler after opening and closing Inline Toolbar)
      */
-    this.Editor.Toolbar.moveAndOpen();
+    if (!this.Editor.ReadOnly.isEnabled) {
+      this.Editor.Toolbar.moveAndOpen();
+    }
   }
 
   /**
