@@ -10,6 +10,10 @@
 - `Improvement` - The current block reference will be updated in read-only mode when blocks are clicked
 - `Fix` - codex-notifier and codex-tooltip moved from devDependencies to dependencies in package.json to solve type errors
 
+### 2.30.7
+
+- `Fix` - Link insertion in Safari fixed
+
 ### 2.30.6
 
 - `Fix` – Fix the display of ‘Convert To’ near blocks that do not have the ‘conversionConfig.export’ rule specified
