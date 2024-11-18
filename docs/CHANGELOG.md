@@ -11,6 +11,10 @@
 - `Fix` - codex-notifier and codex-tooltip moved from devDependencies to dependencies in package.json to solve type errors
 - `Fix` - Handle whitespace input in empty placeholder elements to prevent caret from moving unexpectedly to the end of the placeholder
 
+### 2.30.7
+
+- `Fix` - Link insertion in Safari fixed
+
 ### 2.30.6
 
 - `Fix` – Fix the display of ‘Convert To’ near blocks that do not have the ‘conversionConfig.export’ rule specified
