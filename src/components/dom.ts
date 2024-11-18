@@ -373,7 +373,7 @@ export default class Dom {
       nodeText = nodeText.replace(new RegExp(ignoreChars, 'g'), '');
     }
 
-    return nodeText.trim().length === 0;
+    return nodeText.length === 0;
   }
 
   /**
@@ -670,16 +670,5 @@ export function calculateBaseline(element: Element): number {
  * @param element - The element to toggle the [data-empty] attribute on
  */
 export function toggleEmptyMark(element: HTMLElement): void {
-  const isOnlyWhitespace = isCollapsedWhitespaces(element.textContent || '');
-
-  const isElementEmpty = Dom.isEmpty(element) && isOnlyWhitespace;
-
-  element.dataset.empty = isElementEmpty ? 'true' : 'false';
-
-  if (isElementEmpty) {
-    const lastChild = element.lastChild;
-    if (lastChild && lastChild.nodeType === Node.ELEMENT_NODE && (lastChild as HTMLElement).tagName === 'BR') {
-      element.removeChild(lastChild);
-    }
-  }
+  element.dataset.empty = Dom.isEmpty(element) ? 'true' : 'false';
 }
