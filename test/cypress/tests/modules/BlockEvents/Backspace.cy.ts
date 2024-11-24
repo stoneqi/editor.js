@@ -122,7 +122,7 @@ describe('Backspace keydown', function () {
     it('&nbsp; &nbsp;| — should delete visible and invisble whitespaces in the abscence of any non whitespace characters', function () {
       createEditorWithTextBlocks([
         '1',
-        ' &nbsp;',
+        '&nbsp; &nbsp;',
       ]);
 
       cy.get('[data-cy=editorjs]')
@@ -130,6 +130,8 @@ describe('Backspace keydown', function () {
         .last()
         .click()
         .type('{downArrow}')
+        .type('{backspace}')
+        .type('{backspace}')
         .type('{backspace}')
         .type('{backspace}');
 
