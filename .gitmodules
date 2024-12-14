@@ -43,3 +43,6 @@
 [submodule "example/tools/text-variant-tune"]
 	path = example/tools/text-variant-tune
 	url = https://github.com/editor-js/text-variant-tune
+[submodule "example/tools/list"]
+	path = example/tools/list
+	url = https://github.com/editor-js/list
