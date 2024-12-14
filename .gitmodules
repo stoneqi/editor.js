@@ -10,6 +10,7 @@
 [submodule "example/tools/list"]
 	path = example/tools/list
 	url = https://github.com/editor-js/list
+	branch = main
 [submodule "example/tools/quote"]
 	path = example/tools/quote
 	url = https://github.com/editor-js/quote
