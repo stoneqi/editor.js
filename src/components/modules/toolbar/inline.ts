@@ -10,8 +10,9 @@ import Shortcuts from '../../utils/shortcuts';
 import type { ModuleConfig } from '../../../types-internal/module-config';
 import { CommonInternalSettings } from '../../tools/base';
 import type { Popover, PopoverItemHtmlParams, PopoverItemParams, WithChildren } from '../../utils/popover';
-import { PopoverItemType } from '../../utils/popover';
+import { PopoverDesktop, PopoverItemType } from '../../utils/popover';
 import { PopoverInline } from '../../utils/popover/popover-inline';
+import { PopoverSelect } from '../../utils/popover/popover-select';
 
 /**
  * Inline Toolbar elements
@@ -108,6 +109,34 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     this.Editor.Toolbar.close();
   }
 
+
+    /**
+   *  Moving / appearance
+   *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+
+  /**
+   * Shows Inline Toolbar if something is selected
+   *
+   * @param [needToClose] - pass true to close toolbar if it is not allowed.
+   *                                  Avoid to use it just for closing IT, better call .close() clearly.
+   */
+  public async tryToShowItem(needToClose = false, tipPrompt: string=""): Promise<void> {
+    if (needToClose) {
+      this.close();
+    }
+
+    // if (!this.allowedToShow()) {
+    //   return;
+    // }
+
+    await this.openItem();
+
+    this.Editor.Toolbar.close();
+    // debugger
+  }
+
+
   /**
    * Hides Inline Toolbar
    */
@@ -136,6 +165,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     });
 
     this.toolsInstances = null;
+    // this.Editor.BlockManager.currentInputRange = null;
 
     this.reset();
     this.opened = false;
@@ -186,6 +216,92 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     $.append(this.Editor.UI.nodes.wrapper, this.nodes.wrapper);
   }
 
+    /**
+   * Shows Inline Toolbar
+   */
+    private async openItem(): Promise<void> {
+      if (this.opened) {
+        return;
+      }
+  
+      /**
+       * Show Inline Toolbar
+       */
+  
+      this.opened = true;
+  
+      if (this.popover !== null) {
+        this.popover.destroy();
+      }
+  
+      const currentSelection = SelectionUtils.get();
+      const currentBlock = this.Editor.BlockManager.getBlock(currentSelection.anchorNode as HTMLElement);
+  
+     
+      const popoverItems = [] as PopoverItemParams[];
+      const tool = currentBlock.tool.inlineTools.get('link');
+      if (tool === undefined) {
+        return;
+      }
+  
+      const instance = tool.create();
+      // 获取渲染元素，可能多个
+      const renderedTool = await instance.render();
+
+      if (this.toolsInstances === null) {
+        this.toolsInstances = new Map();
+      }
+
+      // 写入当前工具实例
+      this.toolsInstances.set(tool.name, instance);
+
+      const toolTitle = I18n.t(
+        I18nInternalNS.toolNames,
+        tool.title || _.capitalize(tool.name)
+      );
+
+
+      [ renderedTool ].flat().forEach((item) => {
+        // 写入当前元素
+        const commonPopoverItemParams = {
+          name: tool.name,
+          // 点击的时候执行的参数
+          onActivate: () => {
+            this.toolClicked(instance);
+          },
+          // 提示
+          hint: {
+            title: toolTitle,
+            description: "",
+          },
+          isFlippable: true,
+        } as PopoverItemParams;
+        const popoverItem = {
+          ...commonPopoverItemParams,
+          element: item,
+          type: PopoverItemType.Html,
+          
+        } as PopoverItemParams;
+        popoverItems.push(popoverItem);
+
+      });
+     
+      this.popover = new PopoverSelect({
+        items: popoverItems,
+        scopeElement: this.Editor.API.methods.ui.nodes.redactor,
+        messages: {
+          nothingFound: I18n.ui(I18nInternalNS.ui.popover, 'Nothing found'),
+          search: I18n.ui(I18nInternalNS.ui.popover, 'Filter'),
+        },
+      });
+  
+      this.move(this.popover.size.width);
+  
+      this.nodes.wrapper?.append(this.popover.getElement());
+  
+      this.popover.show();
+    }
+
   /**
    * Shows Inline Toolbar
    */
@@ -227,9 +343,12 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
    *
    * @param popoverWidth - width of the toolbar popover
    */
+  // 将 Toolbar 放到合适的位置
   private move(popoverWidth: number): void {
     const selectionRect = SelectionUtils.rect as DOMRect;
+    // 获取当前warpper 的长宽
     const wrapperOffset = this.Editor.UI.nodes.wrapper.getBoundingClientRect();
+    // 计算实际的坐标
     const newCoords = {
       x: selectionRect.x - wrapperOffset.x,
       y: selectionRect.y +
@@ -244,10 +363,11 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     /**
      * Prevent InlineToolbar from overflowing the content zone on the right side
      */
+    // 保护当前的坐标不会超出页面范围
     if (realRightCoord > this.Editor.UI.contentRect.right) {
       newCoords.x = this.Editor.UI.contentRect.right -popoverWidth - wrapperOffset.x;
     }
-
+    // 设置当前 wrapper 的漂移位置
     this.nodes.wrapper!.style.left = Math.floor(newCoords.x) + 'px';
     this.nodes.wrapper!.style.top = Math.floor(newCoords.y) + 'px';
   }
@@ -333,12 +453,16 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     }
 
     for (let i = 0; i < inlineTools.length; i++) {
+      // 单个工具初始化
       const tool = inlineTools[i];
       const instance = tool.create();
+      // 获取渲染元素，可能多个
       const renderedTool = await instance.render();
 
+      // 写入当前工具实例
       this.toolsInstances.set(tool.name, instance);
 
+      // 生成工具的 快捷键操作
       /** Enable tool shortcut */
       const shortcut = this.getToolShortcut(tool.name);
 
@@ -355,18 +479,23 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
         tool.title || _.capitalize(tool.name)
       );
 
+      // 首先将 renderedTool 包裹在一个数组中（如果 renderedTool 本身不是数组的话，这一步就相当于将其转换为只包含该元素的数组形式），然后使用 flat() 方法对这个数组进行扁平化处理，最后使用 forEach 方法对扁平化后的数组元素进行遍历操作
       [ renderedTool ].flat().forEach((item) => {
+        // 写入当前元素
         const commonPopoverItemParams = {
           name: tool.name,
+          // 点击的时候执行的参数
           onActivate: () => {
             this.toolClicked(instance);
           },
+          // 提示
           hint: {
             title: toolTitle,
             description: shortcutBeautified,
           },
         } as PopoverItemParams;
 
+        // 如果是 html 元素
         if ($.isElement(item)) {
           /**
            * Deprecated way to add custom html elements to the Inline Toolbar

@@ -249,18 +249,21 @@ export default class Block extends EventsDispatcher<BlockEvents> {
       /**
        * Start watching block mutations
        */
+      // 监听 block 的变化
       this.watchBlockMutations();
 
       /**
        * Mutation observer doesn't track changes in "<input>" and "<textarea>"
        * so we need to track focus events to update current input and clear cache.
        */
+      // 监听 input 的 focus 事件
       this.addInputEvents();
 
       /**
        * We mark inputs with [data-empty] attribute
        * It can be useful for developers, for example for correct placeholder behavior
        */
+      // 开启空数据输入标记
       this.toggleInputsEmptyMark();
     });
   }
@@ -826,6 +829,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     /**
      * Update current input
      */
+    // 更新当前输入的元素
     this.updateCurrentInput();
   };
 
@@ -834,6 +838,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
    */
   private addInputEvents(): void {
     this.inputs.forEach(input => {
+      // 监听 input 的 focus 事件
       input.addEventListener('focus', this.handleFocus);
 
       /**
@@ -964,6 +969,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     this.redactorDomChangedCallback = (payload) => {
       const { mutations } = payload;
 
+      // 检查数组中是否有任何一个元素满足 isMutationBelongsToElement 的条件
       const mutationBelongsToBlock = mutations.some(record => isMutationBelongsToElement(record, this.toolRenderedElement));
 
       if (mutationBelongsToBlock) {

@@ -14,32 +14,38 @@ export interface PopoverParams {
    * Element of the page that creates 'scope' of the popover.
    * Depending on its size popover position will be calculated
    */
+  // 创建弹出框的页面元素。根据其大小，将计算弹出框的位置。保证弹出框不会超出页面范围
   scopeElement?: HTMLElement;
 
   /**
    * True if popover should contain search field
    */
+  // 是否可搜索
   searchable?: boolean;
 
   /**
    * False if keyboard navigation should be disabled.
    * True by default
    */
+  // 是否可键盘导航
   flippable?: boolean;
 
   /**
    * Popover texts overrides
    */
+  // 弹出框文本覆盖
   messages?: PopoverMessages
 
   /**
    * CSS class name for popover root element
    */
+  // 弹出框根元素的 CSS 类名
   class?: string;
 
   /**
    * Popover nesting level. 0 value means that it is a root popover
    */
+  // 弹出框嵌套级别。0 表示根弹出框
   nestingLevel?: number;
 }
 

@@ -21,6 +21,7 @@ import { BlockChanged } from '../events';
 import { clean, sanitizeBlocks } from '../utils/sanitizer';
 import { convertStringToBlockData, isBlockConvertable } from '../utils/blocks';
 import PromiseQueue from '../utils/promise-queue';
+import { race } from 'cypress/types/bluebird';
 
 /**
  * @typedef {BlockManager} BlockManager
@@ -143,6 +144,23 @@ export default class BlockManager extends Module {
     return this._blocks.array;
   }
 
+    /**
+   * Get array of Block instances
+   *
+   * @returns {Range} {@link Blocks#array}
+   */
+    public get currentInputRange(): Range {
+      return this._currentInputRange;
+    }
+    /**
+   * Set passed Block as a current
+   *
+   * @param block - block to set as a current
+   */
+    public set currentInputRange(range: Range | null) {
+      this._currentInputRange = range;
+    }
+
   /**
    * Check if each Block is empty
    *
@@ -151,6 +169,14 @@ export default class BlockManager extends Module {
   public get isEditorEmpty(): boolean {
     return this.blocks.every((block) => block.isEmpty);
   }
+
+
+    /**
+   * Index of current working block
+   *
+   * @type {number}
+   */
+    private _currentInputRange: Range|null = null;
 
   /**
    * Index of current working block
@@ -929,6 +955,7 @@ export default class BlockManager extends Module {
    *
    * @param {Block} block - Block to which event should be bound
    */
+  // 绑定块事件
   private bindBlockEvents(block: Block): void {
     const { BlockEvents } = this.Editor;
 

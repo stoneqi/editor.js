@@ -390,7 +390,7 @@ export default class LinkInlineTool implements InlineTool {
      * Edit all link, not selected part
      */
     const anchorTag = this.selection.findParentTag('A');
-
+    
     if (anchorTag) {
       this.selection.expandToTag(anchorTag);
     }

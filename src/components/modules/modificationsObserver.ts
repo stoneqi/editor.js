@@ -54,11 +54,12 @@ export default class ModificationsObserver extends Module {
       config,
       eventsDispatcher,
     });
-
+    // 初始化元素监听器，如果有变动，触发redactorChanged事件
     this.mutationObserver = new MutationObserver((mutations) => {
       this.redactorChanged(mutations);
     });
 
+    // 监听 block 变动事件
     this.eventsDispatcher.on(BlockChanged, (payload) => {
       this.particularBlockChanged(payload.event);
     });
@@ -66,6 +67,7 @@ export default class ModificationsObserver extends Module {
     /**
      * Mutex for fake cursor setting/removing operation
      */
+    // 监听 block 变动事件
     this.eventsDispatcher.on(FakeCursorAboutToBeToggled, () => {
       this.disable();
     });
@@ -109,6 +111,7 @@ export default class ModificationsObserver extends Module {
       return;
     }
 
+    // 保存 block 变动事件，
     this.batchingOnChangeQueue.set(`block:${event.detail.target.id}:event:${event.type as BlockMutationType}`, event);
 
     if (this.batchingTimeout) {

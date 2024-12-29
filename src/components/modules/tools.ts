@@ -5,6 +5,7 @@ import type { SanitizerConfig, ToolConfig, ToolConstructable, ToolSettings } fro
 import BoldInlineTool from '../inline-tools/inline-tool-bold';
 import ItalicInlineTool from '../inline-tools/inline-tool-italic';
 import LinkInlineTool from '../inline-tools/inline-tool-link';
+import TagInlineTool from '../inline-tools/inline-tool-tag';
 import ConvertInlineTool from '../inline-tools/inline-tool-convert';
 import Stub from '../../tools/stub';
 import ToolsFactory from '../tools/factory';
@@ -179,6 +180,10 @@ export default class Tools extends Module {
     return {
       convertTo: {
         class: ConvertInlineTool,
+        isInternal: true,
+      },
+      tag: {
+        class: TagInlineTool,
         isInternal: true,
       },
       link: {

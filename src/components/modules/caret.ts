@@ -400,6 +400,7 @@ export default class Caret extends Module {
     range.insertNode(fragment);
 
     /** Cross-browser caret insertion */
+    // 将光标设置到最后一个子节点
     const newRange = document.createRange();
 
     const nodeToSetCaret = lastChild.nodeType === Node.TEXT_NODE ? lastChild : lastChild.firstChild;

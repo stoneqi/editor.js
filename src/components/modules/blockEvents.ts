@@ -22,6 +22,7 @@ export default class BlockEvents extends Module {
     /**
      * Run common method for all keydown events
      */
+    // debugger
     this.beforeKeydownProcessing(event);
 
     /**
@@ -63,6 +64,17 @@ export default class BlockEvents extends Module {
     if (event.key === '/' && !event.ctrlKey && !event.metaKey) {
       this.slashPressed(event);
     }
+
+
+
+    if (event.key === ']' && !event.ctrlKey && !event.metaKey) {
+      this.Editor.BlockManager.currentInputRange = SelectionUtils.range;
+      this.Editor.BlockManager.currentInputRange.setEnd(this.Editor.BlockManager.currentInputRange.endContainer, 1)
+      this.tagPressed(event);
+      console.log(this.Editor.BlockManager.currentInputRange)
+    }
+
+
 
     /**
      * If user pressed "Ctrl + /" or "Cmd + /" — open Block Settings
@@ -259,6 +271,39 @@ export default class BlockEvents extends Module {
 
     this.activateToolbox();
   }
+
+    /**
+   * '#' keydown inside a Block
+   *
+   * @param event - keydown
+   */
+    private tagPressed(event: KeyboardEvent): void {
+      const currentBlock = this.Editor.BlockManager.currentBlock;
+      // const canOpenToolbox = currentBlock.isEmpty;
+  
+      /**
+       * @todo Handle case when slash pressed when several blocks are selected
+       */
+  
+      /**
+       * Toolbox will be opened only if Block is empty
+       */
+      // if (!canOpenToolbox) {
+      //   return;
+      // }
+
+    
+      /**
+       * The Toolbox will be opened with immediate focus on the Search input,
+       * and '/' will be added in the search input by default — we need to prevent it and add '/' manually
+       */
+      // event.preventDefault();
+      // // event.stopPropagation();
+      // this.Editor.Caret.insertContentAtCaretPosition('#');
+      // this.Editor.BlockManager.currentInputRange.setEnd(this.Editor.BlockManager.currentInputRange.endContainer, this.Editor.BlockManager.currentInputRange.endOffset+1)
+
+      this.Editor.InlineToolbar.tryToShowItem();
+    }
 
   /**
    * ENTER pressed on block

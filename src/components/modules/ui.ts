@@ -9,6 +9,7 @@ import $, { toggleEmptyMark } from '../dom';
 import * as _ from '../utils';
 
 import Selection from '../selection';
+import SelectionUtils from '../selection';
 import Block from '../block';
 import Flipper from '../flipper';
 import { mobileScreenBreakpoint } from '../utils';
@@ -21,8 +22,11 @@ import { EditorMobileLayoutToggled } from '../events';
  * HTML Elements used for UI
  */
 interface UINodes {
+  // 当前 holder 的元素
   holder: HTMLElement;
+  // 添加的 wrapper 元素的里面。包括了编辑器，工具栏（添加），内联工具栏（内链工具栏）等。
   wrapper: HTMLElement;
+  // 添加的 redactor 元素的里面。编辑器的主体。主要是展示编辑器的内容。
   redactor: HTMLElement;
 }
 
@@ -335,17 +339,20 @@ export default class UI extends Module<UINodes> {
    * Bind events on the Editor.js interface
    */
   private enableModuleBindings(): void {
+
+    // 支持点击事件
     this.readOnlyMutableListeners.on(this.nodes.redactor, 'click', (event: MouseEvent) => {
       this.redactorClicked(event);
     }, false);
 
+    // 支持点击事件。设置当前块，并展开工具栏和设置光标
     this.readOnlyMutableListeners.on(this.nodes.redactor, 'mousedown', (event: MouseEvent | TouchEvent) => {
       this.documentTouched(event);
     }, {
       capture: true,
       passive: true,
     });
-
+    // 触摸按下，支持移动端
     this.readOnlyMutableListeners.on(this.nodes.redactor, 'touchstart', (event: MouseEvent | TouchEvent) => {
       this.documentTouched(event);
     }, {
@@ -353,6 +360,7 @@ export default class UI extends Module<UINodes> {
       passive: true,
     });
 
+    // 按下按键触发事件
     this.readOnlyMutableListeners.on(document, 'keydown', (event: KeyboardEvent) => {
       this.documentKeydown(event);
     }, true);
@@ -370,6 +378,7 @@ export default class UI extends Module<UINodes> {
 
     this.readOnlyMutableListeners.on(document, 'selectionchange', selectionChangeDebounced, true);
 
+    // resize 事件
     this.readOnlyMutableListeners.on(window, 'resize', () => {
       this.resizeDebouncer();
     }, {
@@ -379,6 +388,7 @@ export default class UI extends Module<UINodes> {
     /**
      * Start watching 'block-hovered' events that is used by Toolbar for moving
      */
+    // 文本悬浮事件，当鼠标悬浮时，展示对应操作按钮
     this.watchBlockHoveredEvents();
 
     /**
@@ -418,6 +428,7 @@ export default class UI extends Module<UINodes> {
 
       blockHoveredEmitted = hoveredBlock;
 
+      // 触发 BlockHovered 悬浮事件
       this.eventsDispatcher.emit(BlockHovered, {
         block: this.Editor.BlockManager.getBlockByChildNode(hoveredBlock),
       });
@@ -456,6 +467,7 @@ export default class UI extends Module<UINodes> {
    */
   private documentKeydown(event: KeyboardEvent): void {
     switch (event.keyCode) {
+      // enter 键
       case _.keyCodes.ENTER:
         this.enterPressed(event);
         break;
@@ -575,10 +587,12 @@ export default class UI extends Module<UINodes> {
   private enterPressed(event: KeyboardEvent): void {
     const { BlockManager, BlockSelection } = this.Editor;
 
+    // 如果工具栏打开，则不处理
     if (this.someToolbarOpened) {
       return;
     }
 
+    // 当前指针指向的块的索引
     const hasPointerToBlock = BlockManager.currentBlockIndex >= 0;
 
     /**
@@ -747,6 +761,7 @@ export default class UI extends Module<UINodes> {
      * case when user clicks on anchor element
      * if it is clicked via ctrl key, then we open new window with url
      */
+    // 如果同时按 ctrl 键点击锚点元素，则新开一个窗口打开链接
     const element = event.target as Element;
     const ctrlKey = event.metaKey || event.ctrlKey;
 
@@ -772,6 +787,7 @@ export default class UI extends Module<UINodes> {
    *
    * @param event - click event
    */
+  // 如果点击在编辑器的底部区域，则添加一个新的空块
   private processBottomZoneClick(event: MouseEvent): void {
     const lastBlock = this.Editor.BlockManager.getBlockByIndex(-1);
 
@@ -838,7 +854,7 @@ export default class UI extends Module<UINodes> {
        *
        * @todo Make this method more straightforward
        */
-      if (!Selection.range) {
+      if (!Selection.range ) {
         this.Editor.InlineToolbar.close();
       }
 

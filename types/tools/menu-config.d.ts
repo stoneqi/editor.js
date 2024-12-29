@@ -47,6 +47,7 @@ type MenuConfigItemDefaultParams =
 /**
  * Single Menu Config item
  */
+// 单个菜单配置项
 type MenuConfigItem = 
   MenuConfigItemDefaultParams |
   PopoverItemSeparatorParams |

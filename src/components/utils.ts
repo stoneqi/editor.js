@@ -416,6 +416,7 @@ export function isValidMimeType(type: string): boolean {
  * @param {boolean} immediate - call now
  * @returns {Function}
  */
+// 防抖方法
 export function debounce(func: (...args: unknown[]) => void, wait?: number, immediate?: boolean): () => void {
   let timeout;
 
@@ -451,6 +452,7 @@ export function debounce(func: (...args: unknown[]) => void, wait?: number, imme
  *                  but if you'd like to disable the execution on the leading edge, pass
  *                  `{leading: false}`. To disable execution on the trailing edge, ditto.
  */
+// 节流（Throttle）函数是一种用于控制函数执行频率的工具，它和防抖（Debounce）函数类似，但有着不同的行为。节流函数的主要目的是在一定时间间隔内，只允许函数执行一次。即无论触发事件多么频繁，函数都将按照固定的频率（时间间隔）执行。
 export function throttle(func, wait, options: {leading?: boolean; trailing?: boolean} = undefined): () => void {
   let context, args, result;
   let timeout = null;

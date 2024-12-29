@@ -180,7 +180,6 @@ export default class RectangleSelection extends Module {
    */
   private enableModuleBindings(): void {
     const { container } = this.genHTML();
-
     this.listeners.on(container, 'mousedown', (mouseEvent: MouseEvent) => {
       this.processMouseDown(mouseEvent);
     }, false);
@@ -340,12 +339,10 @@ export default class RectangleSelection extends Module {
     if (!this.mousedown) {
       return;
     }
-
     if (event.pageY !== undefined) {
       this.mouseX = event.pageX;
       this.mouseY = event.pageY;
     }
-
     const { rightPos, leftPos, index } = this.genInfoForMouseSelection();
     // There is not new block in selection
 

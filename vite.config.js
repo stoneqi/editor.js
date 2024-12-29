@@ -66,6 +66,7 @@ export default {
   server: {
     port: 3303,
     open: true,
+    host: '0.0.0.0',
   },
 
   plugins: [

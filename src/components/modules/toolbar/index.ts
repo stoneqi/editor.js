@@ -587,10 +587,12 @@ export default class Toolbar extends Module<ToolbarNodes> {
       /**
        * Subscribe to the 'block-hovered' event
        */
+      // 订阅 block-hovered 事件， 如果
       this.eventsDispatcher.on(BlockHovered, (data) => {
         /**
          * Do not move toolbar if Block Settings or Toolbox opened
          */
+        // 如果 Block Settings or Toolbox 开启的话，不移动操作按钮
         if (this.Editor.BlockSettings.opened || this.toolboxInstance?.opened) {
           return;
         }

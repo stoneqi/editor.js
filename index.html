@@ -93,6 +93,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@editorjs/marker@latest"></script><!-- Marker -->
   <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@latest"></script><!-- Inline Code -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/link-autocomplete"></script>
 
   <!-- Initialization -->
   <script type="module">
@@ -195,6 +196,14 @@
           inlineToolbar: true,
           shortcut: 'CMD+ALT+T'
         },
+
+        link: {
+      class: LinkAutocomplete,
+      config: {
+        endpoint: 'http://localhost:3000/',
+        queryParam: 'search'
+      }
+    }
 
       },
 
