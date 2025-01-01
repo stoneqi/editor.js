@@ -16,6 +16,7 @@ import {
   Blocks,
   Caret,
   Events,
+  I18n,
   InlineToolbar,
   Listeners,
   Notifier,
@@ -25,18 +26,18 @@ import {
   Selection,
   Styles,
   Toolbar,
-  Tooltip,
-  I18n,
-  Ui,
   Tools,
+  Tooltip,
+  Ui,
 } from './api';
 
 import { OutputData } from './data-formats';
 import { BlockMutationEvent, BlockMutationEventMap, BlockMutationType } from './events/block';
-import { BlockAddedMutationType, BlockAddedEvent } from './events/block/BlockAdded';
-import { BlockChangedMutationType, BlockChangedEvent } from './events/block/BlockChanged';
-import { BlockMovedMutationType, BlockMovedEvent } from './events/block/BlockMoved';
-import { BlockRemovedMutationType, BlockRemovedEvent } from './events/block/BlockRemoved';
+import { BlockAddedEvent, BlockAddedMutationType } from './events/block/BlockAdded';
+import { BlockChangedEvent, BlockChangedMutationType } from './events/block/BlockChanged';
+import { BlockMovedEvent, BlockMovedMutationType } from './events/block/BlockMoved';
+import { BlockRemovedEvent, BlockRemovedMutationType } from './events/block/BlockRemoved';
+import { TriggerInput } from '@/types/api/trigger-input';
 
 /**
  * Interfaces used for development
@@ -120,6 +121,7 @@ export interface API {
   i18n: I18n;
   readOnly: ReadOnly;
   ui: Ui;
+  triggerInput: TriggerInput;
 }
 
 /**

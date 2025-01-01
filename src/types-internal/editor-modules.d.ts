@@ -37,6 +37,8 @@ import Saver from '../components/modules/saver';
 import Tools from '../components/modules/tools';
 import UI from '../components/modules/ui';
 import ToolsAPI from '../components/modules/api/tools';
+import TriggerInputAPI from '../components/modules/api/triggerInput';
+import TriggerInputTool from '../components/modules/toolbar/triggerInput';
 
 export interface EditorModules {
   // API Modules
@@ -57,11 +59,13 @@ export interface EditorModules {
   ToolbarAPI: ToolbarAPI,
   TooltipAPI: TooltipAPI,
   UiAPI: UiAPI,
+  TriggerInputAPI: TriggerInputAPI,
 
   // Toolbar Modules
   BlockSettings: BlockSettings,
   Toolbar: Toolbar,
   InlineToolbar: InlineToolbar,
+  TriggerInputTool: TriggerInputTool,
 
   // Modules
   BlockEvents: BlockEvents,

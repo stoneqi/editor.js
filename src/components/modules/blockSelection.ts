@@ -146,11 +146,13 @@ export default class BlockSelection extends Module {
    * to select all and copy them
    */
   public prepare(): void {
+    // 新建选择
     this.selection = new SelectionUtils();
 
     /**
      * CMD/CTRL+A selection shortcut
      */
+    // 添加 CMD/CTRL+A 快捷选择
     Shortcuts.add({
       name: 'CMD+A',
       handler: (event) => {
@@ -406,12 +408,14 @@ export default class BlockSelection extends Module {
      * If Block has more than one editable element allow native selection
      * Second cmd+a will select whole Block
      */
+    // 如果有多个可编辑的元素则允许 native selection
     if (inputs.length > 1 && !this.readyToBlockSelection) {
       this.readyToBlockSelection = true;
 
       return;
     }
 
+    // 如果只有一个，且不需要选择所有的，则 使用 默认的，只选择一个。第二次则选择所有的
     if (inputs.length === 1 && !this.needToSelectAll) {
       this.needToSelectAll = true;
 

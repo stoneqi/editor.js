@@ -144,23 +144,6 @@ export default class BlockManager extends Module {
     return this._blocks.array;
   }
 
-    /**
-   * Get array of Block instances
-   *
-   * @returns {Range} {@link Blocks#array}
-   */
-    public get currentInputRange(): Range {
-      return this._currentInputRange;
-    }
-    /**
-   * Set passed Block as a current
-   *
-   * @param block - block to set as a current
-   */
-    public set currentInputRange(range: Range | null) {
-      this._currentInputRange = range;
-    }
-
   /**
    * Check if each Block is empty
    *
@@ -169,14 +152,6 @@ export default class BlockManager extends Module {
   public get isEditorEmpty(): boolean {
     return this.blocks.every((block) => block.isEmpty);
   }
-
-
-    /**
-   * Index of current working block
-   *
-   * @type {number}
-   */
-    private _currentInputRange: Range|null = null;
 
   /**
    * Index of current working block
@@ -198,6 +173,7 @@ export default class BlockManager extends Module {
    * Define this._blocks property
    */
   public prepare(): void {
+    // 装备 blocks
     const blocks = new Blocks(this.Editor.UI.nodes.redactor);
 
     /**
@@ -218,6 +194,8 @@ export default class BlockManager extends Module {
     });
 
     /** Copy event */
+    // 添加复制事件监听
+    // this.listeners 负责管理所有监听事件
     this.listeners.on(
       document,
       'copy',
@@ -260,7 +238,11 @@ export default class BlockManager extends Module {
     tunes: tunesData = {},
   }: {tool: string; id?: string; data?: BlockToolData; tunes?: {[name: string]: BlockTuneData}}): Block {
     const readOnly = this.Editor.ReadOnly.isEnabled;
+
+    // 获取工具 BlockToolAdapter
     const tool = this.Editor.Tools.blockTools.get(name);
+
+    // 新建 block， 并注册有元素变动时 触发 didMutated 事件
     const block = new Block({
       id,
       data,
@@ -955,7 +937,7 @@ export default class BlockManager extends Module {
    *
    * @param {Block} block - Block to which event should be bound
    */
-  // 绑定块事件
+  // 给每个块绑定事件
   private bindBlockEvents(block: Block): void {
     const { BlockEvents } = this.Editor;
 
@@ -975,6 +957,7 @@ export default class BlockManager extends Module {
       BlockEvents.dragLeave(event);
     });
 
+    // 绑定 didMutated 函数， 用以更新 getBlockIndex 当前索引
     block.on('didMutated', (affectedBlock: Block) => {
       return this.blockDidMutated(BlockChangedMutationType, affectedBlock, {
         index: this.getBlockIndex(affectedBlock),

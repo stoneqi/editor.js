@@ -9,3 +9,5 @@ export const selectionChangeDebounceTimeout = 180;
  * {@link modules/modificationsObserver.ts}
  */
 export const modificationsObserverBatchTimeout = 400;
+
+export const triggertInputShowDebounceTimeout = 180;

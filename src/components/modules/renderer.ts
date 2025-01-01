@@ -25,6 +25,8 @@ export default class Renderer extends Module {
          * Create Blocks instances
          */
         const blocks = blocksData.map(({ type: tool, data, tunes, id }) => {
+
+          // 判断是否存在对应工具，如果没有则显示 StubData 不支持的数据
           if (Tools.available.has(tool) === false) {
             _.logLabeled(`Tool «${tool}» is not found. Check 'tools' property at the Editor.js config.`, 'warn');
 
@@ -35,6 +37,7 @@ export default class Renderer extends Module {
           let block: Block;
 
           try {
+            // 新建该 Block
             block = BlockManager.composeBlock({
               id,
               tool,

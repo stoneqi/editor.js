@@ -59,6 +59,7 @@ export default class Core {
         const { BlockManager, Caret, UI, ModificationsObserver } = this.moduleInstances;
 
         UI.checkEmptiness();
+        // 开启元素变化监听事件
         ModificationsObserver.enable();
 
         if ((this.configuration as EditorConfig).autofocus) {
@@ -290,6 +291,7 @@ export default class Core {
   private constructModules(): void {
     Object.entries(Modules).forEach(([key, module]) => {
       try {
+        // 初始化模块，传递 config 和 event
         this.moduleInstances[key] = new module({
           config: this.configuration,
           eventsDispatcher: this.eventsDispatcher,

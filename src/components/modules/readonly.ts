@@ -33,6 +33,7 @@ export default class ReadOnly extends Module {
   /**
    * Set initial state
    */
+  // 触发不同模块的 readOnly
   public async prepare(): Promise<void> {
     const { Tools } = this.Editor;
     const { blockTools } = Tools;
@@ -52,6 +53,7 @@ export default class ReadOnly extends Module {
       this.throwCriticalError();
     }
 
+    // UI 触发
     this.toggle(this.config.readOnly, true);
   }
 
@@ -95,6 +97,7 @@ export default class ReadOnly extends Module {
     /**
      * Do not re-render blocks if it's initial call
      */
+    // 如果初始化，则不重新渲染
     if (isInitial) {
       return this.readOnlyEnabled;
     }

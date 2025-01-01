@@ -238,6 +238,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
      */
     this.tunes = tool.tunes;
 
+    // 组装 Tunes
     this.composeTunes(tunesData);
 
     this.holder = this.compose();
@@ -245,6 +246,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     /**
      * Bind block events in RIC for optimizing of constructing process time
      */
+    // 绑定事件
     window.requestIdleCallback(() => {
       /**
        * Start watching block mutations
@@ -665,6 +667,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
      *
      * If anchorNode is undefined, also use activeElement
      */
+    // document.activeElement 是 JavaScript 中 document 对象的一个属性，用于获取当前文档中具有焦点的元素。 升级当前输入区域
     this.currentInput = $.isNativeInput(document.activeElement) || !SelectionUtils.anchorNode
       ? document.activeElement
       : SelectionUtils.anchorNode;
@@ -746,6 +749,8 @@ export default class Block extends EventsDispatcher<BlockEvents> {
    * @returns {HTMLDivElement}
    */
   private compose(): HTMLDivElement {
+
+    // 初始化了三个元素，其中 pluginsContent 是原始的 bolck 方法的 render 元素
     const wrapper = $.make('div', Block.CSS.wrapper) as HTMLDivElement,
         contentNode = $.make('div', Block.CSS.content),
         pluginsContent = this.toolInstance.render();
@@ -765,6 +770,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
      */
     this.toolRenderedElement = pluginsContent;
 
+    // 渲染内容写入到 contentNode 中
     contentNode.appendChild(this.toolRenderedElement);
 
     /**
@@ -778,6 +784,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
      */
     let wrappedContentNode: HTMLElement = contentNode;
 
+    // 判断 tunes 是否有  wrap 方法，有的话则执行 tune 的 warp 方法
     [...this.tunesInstances.values(), ...this.defaultTunesInstances.values()]
       .forEach((tune) => {
         if (_.isFunction(tune.wrap)) {
@@ -837,6 +844,8 @@ export default class Block extends EventsDispatcher<BlockEvents> {
    * Adds focus event listeners to all inputs and contenteditable
    */
   private addInputEvents(): void {
+
+    // 所有的输入元素 添加监听事件
     this.inputs.forEach(input => {
       // 监听 input 的 focus 事件
       input.addEventListener('focus', this.handleFocus);
@@ -844,6 +853,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
       /**
        * If input is native input add oninput listener to observe changes
        */
+      // 如果是原生输入组件，添加 input 事件， 触发 didMutated函数
       if ($.isNativeInput(input)) {
         input.addEventListener('input', this.didMutated as EventListener);
       }
@@ -936,6 +946,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
       return;
     }
 
+    // 删除输入缓存
     this.dropInputsCache();
 
     /**
@@ -972,11 +983,13 @@ export default class Block extends EventsDispatcher<BlockEvents> {
       // 检查数组中是否有任何一个元素满足 isMutationBelongsToElement 的条件
       const mutationBelongsToBlock = mutations.some(record => isMutationBelongsToElement(record, this.toolRenderedElement));
 
+      // 如果该 block 有 dom 改变
       if (mutationBelongsToBlock) {
         this.didMutated(mutations);
       }
     };
 
+    // 订阅 RedactorDomChanged 事件
     this.editorEventBus?.on(RedactorDomChanged, this.redactorDomChangedCallback);
   }
 

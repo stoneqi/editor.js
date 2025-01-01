@@ -37,9 +37,11 @@ import Renderer from './renderer';
 import Saver from './saver';
 import Tools from './tools';
 import UI from './ui';
+import TriggerInputAPI from './api/triggerInput';
+import TriggerInputTool from './toolbar/triggerInput';
 
 export default {
-  // API Modules
+  // API Modules  API 提供给外部使用的。具体实现是在 Modules 和 Toolbar中
   BlocksAPI,
   CaretAPI,
   EventsAPI,
@@ -57,11 +59,14 @@ export default {
   ToolbarAPI,
   TooltipAPI,
   UiAPI,
+  TriggerInputAPI,
 
   // Toolbar Modules
   BlockSettings,
   Toolbar,
   InlineToolbar,
+  TriggerInputTool,
+
 
   // Modules
   BlockEvents,

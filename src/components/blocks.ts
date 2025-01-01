@@ -274,6 +274,7 @@ export default class Blocks {
     /**
      * Call Rendered event for each block
      */
+    // caller  debugger 渲染完成事件
     blocks.forEach((block) => block.call(BlockToolAPI.RENDERED));
   }
 

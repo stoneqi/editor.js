@@ -9,7 +9,6 @@ import $, { toggleEmptyMark } from '../dom';
 import * as _ from '../utils';
 
 import Selection from '../selection';
-import SelectionUtils from '../selection';
 import Block from '../block';
 import Flipper from '../flipper';
 import { mobileScreenBreakpoint } from '../utils';
@@ -127,16 +126,19 @@ export default class UI extends Module<UINodes> {
     /**
      * Detect mobile version
      */
+    // 判断是否是移动版本
     this.setIsMobile();
 
     /**
      * Make main UI elements
      */
+    // 创建主要的主题元素
     this.make();
 
     /**
      * Load and append CSS
      */
+    // 载入 css 信息
     this.loadStyles();
   }
 
@@ -193,9 +195,9 @@ export default class UI extends Module<UINodes> {
    * @returns {boolean}
    */
   public get someToolbarOpened(): boolean {
-    const { Toolbar, BlockSettings, InlineToolbar } = this.Editor;
+    const { Toolbar, BlockSettings, InlineToolbar, TriggerInputTool } = this.Editor;
 
-    return Boolean(BlockSettings.opened || InlineToolbar.opened || Toolbar.toolbox.opened);
+    return Boolean(BlockSettings.opened || InlineToolbar.opened || Toolbar.toolbox.opened || TriggerInputTool.opened);
   }
 
   /**
@@ -339,7 +341,6 @@ export default class UI extends Module<UINodes> {
    * Bind events on the Editor.js interface
    */
   private enableModuleBindings(): void {
-
     // 支持点击事件
     this.readOnlyMutableListeners.on(this.nodes.redactor, 'click', (event: MouseEvent) => {
       this.redactorClicked(event);
@@ -574,6 +575,8 @@ export default class UI extends Module<UINodes> {
       this.Editor.BlockSettings.close();
     } else if (this.Editor.InlineToolbar.opened) {
       this.Editor.InlineToolbar.close();
+    } else if (this.Editor.TriggerInputTool.opened) {
+      this.Editor.TriggerInputTool.close();
     } else {
       this.Editor.Toolbar.close();
     }
@@ -757,6 +760,9 @@ export default class UI extends Module<UINodes> {
       return;
     }
 
+    // 如果光标被点击，则关闭展示窗口
+    this.Editor.TriggerInputTool.close();
+    //
     /**
      * case when user clicks on anchor element
      * if it is clicked via ctrl key, then we open new window with url

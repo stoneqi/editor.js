@@ -106,12 +106,14 @@ export default class Tools extends Module {
    *
    * @returns {Promise<void>}
    */
+  // 创建所有的 tool 及对应的 inline-tool 和 BlockTunes
   public async prepare(): Promise<void> {
     this.validateTools();
 
     /**
      * Assign internal tools
      */
+    // merge 内置的配置和上传的配置
     this.config.tools = _.deepMerge({}, this.internalTools, this.config.tools);
 
     if (!Object.prototype.hasOwnProperty.call(this.config, 'tools') || Object.keys(this.config.tools).length === 0) {
@@ -120,11 +122,13 @@ export default class Tools extends Module {
 
     const config = this.prepareConfig();
 
+    // 实例化 tools 工厂
     this.factory = new ToolsFactory(config, this.config, this.Editor.API);
 
     /**
      * getting classes that has prepare method
      */
+    // 获得每个 tools 需要  prepare 执行的函数
     const sequenceData = this.getListOfPrepareFunctions(config);
 
     /**

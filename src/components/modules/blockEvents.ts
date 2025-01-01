@@ -61,19 +61,10 @@ export default class BlockEvents extends Module {
      *
      * @todo probably using "beforeInput" event would be better here
      */
+
     if (event.key === '/' && !event.ctrlKey && !event.metaKey) {
       this.slashPressed(event);
     }
-
-
-
-    if (event.key === ']' && !event.ctrlKey && !event.metaKey) {
-      this.Editor.BlockManager.currentInputRange = SelectionUtils.range;
-      this.Editor.BlockManager.currentInputRange.setEnd(this.Editor.BlockManager.currentInputRange.endContainer, 1)
-      this.tagPressed(event);
-      console.log(this.Editor.BlockManager.currentInputRange)
-    }
-
 
 
     /**
@@ -131,9 +122,15 @@ export default class BlockEvents extends Module {
     /**
      * If shift key was pressed some special shortcut is used (eg. cross block selection via shift + arrows)
      */
+    // debugger;
+    if (event.key !== 'Shift' && event.key !== 'Ctrl') {
+      this.tagPressed(event);
+    }
+
     if (event.shiftKey) {
       return;
     }
+
 
     /**
      * Check if editor is empty on each keyup and add special css class to wrapper
@@ -272,38 +269,14 @@ export default class BlockEvents extends Module {
     this.activateToolbox();
   }
 
-    /**
+  /**
    * '#' keydown inside a Block
    *
    * @param event - keydown
    */
-    private tagPressed(event: KeyboardEvent): void {
-      const currentBlock = this.Editor.BlockManager.currentBlock;
-      // const canOpenToolbox = currentBlock.isEmpty;
-  
-      /**
-       * @todo Handle case when slash pressed when several blocks are selected
-       */
-  
-      /**
-       * Toolbox will be opened only if Block is empty
-       */
-      // if (!canOpenToolbox) {
-      //   return;
-      // }
-
-    
-      /**
-       * The Toolbox will be opened with immediate focus on the Search input,
-       * and '/' will be added in the search input by default — we need to prevent it and add '/' manually
-       */
-      // event.preventDefault();
-      // // event.stopPropagation();
-      // this.Editor.Caret.insertContentAtCaretPosition('#');
-      // this.Editor.BlockManager.currentInputRange.setEnd(this.Editor.BlockManager.currentInputRange.endContainer, this.Editor.BlockManager.currentInputRange.endOffset+1)
-
-      this.Editor.InlineToolbar.tryToShowItem();
-    }
+  private tagPressed(event: KeyboardEvent): void {
+    this.Editor.TriggerInputTool.tryToShow(event.key);
+  }
 
   /**
    * ENTER pressed on block

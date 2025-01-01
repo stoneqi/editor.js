@@ -2,6 +2,8 @@
  * Build styles
  */
 import { API, InlineTool, InlineToolConstructorOptions, SanitizerConfig } from "../../../types";
+import { MenuConfig } from '@/types/tools';
+import { generateTagId } from '../utils';
 
 interface IconClasses {
   base: string;
@@ -30,6 +32,8 @@ export default class TagInlineTool implements InlineTool {
    * CSS classes for the icon
    */
   private iconClasses: IconClasses;
+
+  public static title: string = 'tag';
 
   /**
    * Styles
@@ -64,6 +68,12 @@ export default class TagInlineTool implements InlineTool {
    * @return {HTMLElement}
    */
   render(): HTMLElement {
+    // return {
+    //   icon: this.toolboxIcon,
+    //   onActivate: () => {
+    //     //
+    //   },
+    // };
     this.button = document.createElement('button');
     this.button.type = 'button';
     this.button.classList.add(this.iconClasses.base);
@@ -106,7 +116,8 @@ export default class TagInlineTool implements InlineTool {
     let span = document.createElement(this.tag);
 
     span.classList.add(this.CSS.tag);
-    span.setAttribute("contenteditable", "false");
+    span.setAttribute('contenteditable', 'false');
+    span.dataset.id = generateTagId();
 
     /**
      * SurroundContent throws an error if the Range splits a non-Text node with only one of its boundary points
@@ -159,7 +170,7 @@ export default class TagInlineTool implements InlineTool {
 
   /**
    * Check and change Term's state for current selection
-   * 
+   *
    * @return {boolean}
    */
   checkState(): boolean {

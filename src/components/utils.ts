@@ -59,6 +59,24 @@ export const keyCodes = {
   SLASH: 191,
 };
 
+export const keys = {
+  BACKSPACE: 'Backspace',
+  TAB: 9,
+  ENTER: 13,
+  SHIFT: 16,
+  CTRL: 17,
+  ALT: 18,
+  ESC: 27,
+  SPACE: 'Space',
+  LEFT: 'ArrowLeft',
+  UP: 'Up',
+  DOWN: 'Down',
+  RIGHT: 'ArrowRight',
+  DELETE: 'Delete',
+  META: 91,
+  SLASH: 191,
+};
+
 /**
  * Return mouse buttons codes
  */
@@ -662,6 +680,17 @@ export function getValidUrl(url: string): string {
  * @returns {string}
  */
 export function generateBlockId(): string {
+  const idLen = 10;
+
+  return nanoid(idLen);
+}
+
+/**
+ * Create a tag id
+ *
+ * @returns {string}
+ */
+export function generateTagId(): string {
   const idLen = 10;
 
   return nanoid(idLen);

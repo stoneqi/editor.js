@@ -8,18 +8,13 @@ import I18n from '../../i18n';
 import { I18nInternalNS } from '../../i18n/namespace-internal';
 import Shortcuts from '../../utils/shortcuts';
 import type { ModuleConfig } from '../../../types-internal/module-config';
-import { CommonInternalSettings } from '../../tools/base';
 import type { Popover, PopoverItemHtmlParams, PopoverItemParams, WithChildren } from '../../utils/popover';
-import { PopoverDesktop, PopoverItemType } from '../../utils/popover';
+import { PopoverItemType } from '../../utils/popover';
 import { PopoverInline } from '../../utils/popover/popover-inline';
 import { PopoverSelect } from '../../utils/popover/popover-select';
+import { isPrintableKey } from '../../utils';
+import { selectionChangeDebounceTimeout, triggertInputShowDebounceTimeout } from '../../constants';
 
-/**
- * Inline Toolbar elements
- */
-interface InlineToolbarNodes {
-  wrapper: HTMLElement | undefined;
-}
 
 /**
  * Inline toolbar with actions that modifies selected text fragment
@@ -28,18 +23,36 @@ interface InlineToolbarNodes {
  * |   B  i [link] [mark]   |
  * |________________________|
  */
-export default class InlineToolbar extends Module<InlineToolbarNodes> {
+export default class TriggerInputTool extends Module {
   /**
    * CSS styles
    */
   public CSS = {
-    inlineToolbar: 'ce-inline-toolbar',
+    triggerToolbar: 'ce-trigger-toolbar',
   };
 
   /**
    * State of inline toolbar
    */
   public opened = false;
+
+  /**
+   * State of inline toolbar
+   */
+  public isTriggering = false;
+
+
+  /**
+   * State of inline toolbar
+   */
+  public currentTriggerInputRange : Range | null = false;
+
+  public currentBlockIndex  = -1;
+
+  public triggertInputShowDebounced = _.debounce(async () => {
+    console.log('triggrtInput show', this.currentTriggerInputRange?.toString());
+    await this.open();
+  }, triggertInputShowDebounceTimeout);
 
   /**
    * Popover instance reference
@@ -94,20 +107,16 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
    *
    * @param [needToClose] - pass true to close toolbar if it is not allowed.
    *                                  Avoid to use it just for closing IT, better call .close() clearly.
+   * @param keycode
    */
-  public async tryToShow(needToClose = false): Promise<void> {
-    if (needToClose) {
+  public async tryToShow(keycode: string): Promise<void> {
+    if (!this.allowedToShow(keycode)) {
       this.close();
-    }
 
-    if (!this.allowedToShow()) {
       return;
     }
-
-    await this.open();
-
+    this.triggertInputShowDebounced();
     this.Editor.Toolbar.close();
-    this.Editor.TriggerInputTool.close();
   }
 
 
@@ -146,25 +155,24 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     if (!this.opened) {
       return;
     }
-
     if (this.Editor.ReadOnly.isEnabled) {
       return;
     }
 
-    Array.from(this.toolsInstances.entries()).forEach(([name, toolInstance]) => {
-      const shortcut = this.getToolShortcut(name);
+    console.log('triggrtInput close', this.currentTriggerInputRange?.toString());
 
-      if (shortcut) {
-        Shortcuts.remove(this.Editor.UI.nodes.redactor, shortcut);
-      }
 
-      /**
-       * @todo replace 'clear' with 'destroy'
-       */
-      if (_.isFunction(toolInstance.clear)) {
-        toolInstance.clear();
-      }
-    });
+    this.currentTriggerInputRange = null;
+    this.isTriggering = false;
+
+    // Array.from(this.toolsInstances.entries()).forEach(([name, toolInstance]) => {
+    //   /**
+    //    * @todo replace 'clear' with 'destroy'
+    //    */
+    //   if (_.isFunction(toolInstance.clear)) {
+    //     toolInstance.clear();
+    //   }
+    // });
 
     this.toolsInstances = null;
     // this.Editor.BlockManager.currentInputRange = null;
@@ -204,7 +212,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
    */
   private make(): void {
     this.nodes.wrapper = $.make('div', [
-      this.CSS.inlineToolbar,
+      this.CSS.triggerToolbar,
       ...(this.isRtl ? [ this.Editor.UI.CSS.editorRtlFix ] : []),
     ]);
 
@@ -221,10 +229,11 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   /**
    * Shows Inline Toolbar
    */
-  private async openItem(): Promise<void> {
-    if (this.opened) {
-      return;
-    }
+  private async open(): Promise<void> {
+    // debugger;
+    // if (this.opened) {
+    //   return;
+    // }
 
     /**
      * Show Inline Toolbar
@@ -308,7 +317,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   /**
    * Shows Inline Toolbar
    */
-  private async open(): Promise<void> {
+  private async openItem(): Promise<void> {
     if (this.opened) {
       return;
     }
@@ -385,59 +394,128 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
 
   /**
    * Need to show Inline Toolbar or not
+   *
+   * @param keycode
    */
-  private allowedToShow(): boolean {
+  private allowedToShow( keycode :string ): boolean {
+    // debugger;
     /**
      * Tags conflicts with window.selection function.
      * Ex. IMG tag returns null (Firefox) or Redactors wrapper (Chrome)
      */
-    const tagsConflictsWithSelection = ['IMG', 'INPUT'];
-    const currentSelection = SelectionUtils.get();
-    const selectedText = SelectionUtils.text;
+    if (!this.isTriggering) {
+      if (this.isToolTrigger(keycode)) {
+        this.isTriggering = true;
+        const currentSelection = SelectionUtils.get();
 
-    // old browsers
-    if (!currentSelection || !currentSelection.anchorNode) {
+        if (currentSelection && currentSelection.rangeCount > 0) {
+          const rangeCopy = currentSelection.getRangeAt(0).cloneRange();
+
+          // debugger;
+
+          this.currentBlockIndex = this.Editor.BlockManager.currentBlockIndex;
+          // rangeCopy.setEnd(startNode, startOffset);
+          this.currentTriggerInputRange =  rangeCopy;
+          this.currentTriggerInputRange.setStart(this.currentTriggerInputRange.startContainer, this.currentTriggerInputRange.startOffset-1);
+
+          return true;
+        }
+      }
+
+
+      return false;
+    }
+    const ignoreKeys: string[] = [_.keys.LEFT, _.keys.RIGHT];
+
+    // debugger;
+    if (ignoreKeys.includes(keycode)) {
       return false;
     }
 
-    // empty selection
-    if (currentSelection.isCollapsed || selectedText.length < 1) {
-      return false;
+    if ( this.isTriggering && this.currentTriggerInputRange && this.currentBlockIndex === this.Editor.BlockManager.currentBlockIndex ) {
+      const currentSelection = SelectionUtils.get();
+
+      if (currentSelection.rangeCount > 0) {
+        const cursorRange = currentSelection.getRangeAt(0);
+        const cursorStart = cursorRange.startOffset;
+        const sampleRangeStart = this.currentTriggerInputRange.startOffset;
+
+        if (cursorStart >= sampleRangeStart) {
+          this.currentTriggerInputRange.setEnd(this.currentTriggerInputRange.endContainer, cursorStart);
+          if (!this.currentTriggerInputRange.collapsed) {
+            return true;
+          }
+        }
+      }
     }
 
-    const target = !$.isElement(currentSelection.anchorNode)
-      ? currentSelection.anchorNode.parentElement
-      : currentSelection.anchorNode;
+    return false;
 
-    if (target === null) {
-      return false;
-    }
+    // const currentSelection = SelectionUtils.get();
+    // const selectedText = SelectionUtils.text;
+    //
+    // // old browsers
+    // if (!currentSelection || !currentSelection.anchorNode) {
+    //   return false;
+    // }
 
-    if (currentSelection && tagsConflictsWithSelection.includes(target.tagName)) {
-      return false;
-    }
-
-    // The selection of the element only in contenteditable
-    const contenteditable = target.closest('[contenteditable="true"]');
-
-    if (contenteditable === null) {
-      return false;
-    }
-
-    // is enabled by current Block's Tool
-    const currentBlock = this.Editor.BlockManager.getBlock(currentSelection.anchorNode as HTMLElement);
-
-    if (!currentBlock) {
-      return false;
-    }
-
-    return currentBlock.tool.inlineTools.size !== 0;
+    // // empty selection
+    // if (currentSelection.isCollapsed || selectedText.length < 1) {
+    //   return false;
+    // }
+    //
+    // const target = !$.isElement(currentSelection.anchorNode)
+    //   ? currentSelection.anchorNode.parentElement
+    //   : currentSelection.anchorNode;
+    //
+    // if (target === null) {
+    //   return false;
+    // }
+    //
+    // // The selection of the element only in contenteditable
+    // const contenteditable = target.closest('[contenteditable="true"]');
+    //
+    // if (contenteditable === null) {
+    //   return false;
+    // }
+    //
+    // // is enabled by current Block's Tool
+    // const currentBlock = this.Editor.BlockManager.getBlock(currentSelection.anchorNode as HTMLElement);
+    //
+    // if (!currentBlock) {
+    //   return false;
+    // }
+    //
+    // return currentBlock.tool.inlineTools.size !== 0;
   }
 
   /**
    *  Working with Tools
    *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
+
+  /**
+   *
+   * @param keycode
+   */
+  private selectInTriggerRange(): boolean {
+    if ( this.isTriggering && this.currentTriggerInputRange && this.currentBlockIndex === this.Editor.BlockManager.currentBlockIndex ) {
+      const currentSelection = SelectionUtils.get();
+
+      if (currentSelection.rangeCount > 0 ) {
+        const cursorRange = currentSelection.getRangeAt(0);
+        const cursorStart = cursorRange.startOffset;
+        const sampleRangeStart =this.currentTriggerInputRange.startOffset;
+        const sampleRangeEnd = this.currentTriggerInputRange.endOffset;
+
+        if (cursorStart >= sampleRangeStart && cursorStart <= sampleRangeEnd + 1) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 
   /**
    * Returns Inline Tools segregated by their appearance type: popover items and custom html elements.
@@ -464,10 +542,6 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
 
       // 写入当前工具实例
       this.toolsInstances.set(tool.name, instance);
-
-      // 生成工具的 快捷键操作
-      /** Enable tool shortcut */
-      const shortcut = this.getToolShortcut(tool.name);
 
       if (shortcut) {
         try {
@@ -587,28 +661,12 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
    * Get shortcut name for tool
    *
    * @param toolName — Tool name
+   * @param keycode
    */
-  private getToolShortcut(toolName: string): string | undefined {
-    const { Tools } = this.Editor;
+  private isToolTrigger(keycode: string): boolean {
+    const triggerKey: string[] = [ '#' ];
 
-    /**
-     * Enable shortcuts
-     * Ignore tool that doesn't have shortcut or empty string
-     */
-    const tool = Tools.inlineTools.get(toolName);
-
-    /**
-     * 1) For internal tools, check public getter 'shortcut'
-     * 2) For external tools, check tool's settings
-     * 3) If shortcut is not set in settings, check Tool's public property
-     */
-    const internalTools = Tools.internal.inlineTools;
-
-    if (Array.from(internalTools.keys()).includes(toolName)) {
-      return this.inlineTools[toolName][CommonInternalSettings.Shortcut];
-    }
-
-    return tool?.shortcut;
+    return triggerKey.includes(keycode);
   }
 
   /**
@@ -674,7 +732,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
    * Get inline tools tools
    * Tools that has isInline is true
    */
-  private get inlineTools(): { [name: string]: IInlineTool } {
+  private get triggerTools(): { [name: string]: IInlineTool } {
     const result = {} as  { [name: string]: IInlineTool } ;
 
     Array
