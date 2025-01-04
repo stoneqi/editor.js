@@ -33,6 +33,13 @@ export interface InlineTool extends BaseTool<HTMLElement | MenuConfig> {
    */
   renderActions?(): HTMLElement;
 
+
+  /**
+   * Make additional element with actions
+   * For example, input for the 'link' tool or textarea for the 'comment' tool
+   * @deprecated use {@link MenuConfig} item children to set item actions instead
+   */
+  renderTrigger?(): MenuConfig;
   /**
    * Function called with Inline Toolbar closing
    * @deprecated 2020 10/02 - The new instance will be created each time the button is rendered. So clear is not needed.

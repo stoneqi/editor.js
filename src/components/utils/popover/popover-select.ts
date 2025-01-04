@@ -1,7 +1,7 @@
 import { isMobileScreen } from '../../utils';
-import type { PopoverItem } from './components/popover-item';
-import { PopoverItemDefault, PopoverItemType } from './components/popover-item';
-import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
+import type { PopoverItem, PopoverItemDefault } from './components/popover-item';
+import { PopoverItemType } from './components/popover-item';
+import type { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
 import { PopoverDesktop } from './popover-desktop';
 import { CSSVariables, css } from './popover.const';
 import type { PopoverParams } from '@/types/utils/popover/popover';
@@ -21,47 +21,9 @@ export class PopoverSelect extends PopoverDesktop {
     super(
       {
         ...params,
-        class: css.popoverInline,
-      },
-      {
-        [PopoverItemType.Default]: {
-          /**
-           * We use button instead of div here to fix bug associated with focus loss (which leads to selection change) on click in safari
-           *
-           * @todo figure out better way to solve the issue
-           */
-          wrapperTag: 'button',
-          hint: {
-            position: 'top',
-            alignment: 'center',
-            enabled: isHintEnabled,
-          },
-        },
-        [PopoverItemType.Html]: {
-          hint: {
-            position: 'top',
-            alignment: 'center',
-            enabled: isHintEnabled,
-          },
-        },
+        class: css.popover,
       }
     );
-
-    /**
-     * If active popover item has children, show them.
-     * This is needed to display link url text (which is displayed as a nested popover content)
-     * once you select <a> tag content in text
-     */
-    // this.items
-    //   .forEach((item) => {
-    //     if (!(item instanceof PopoverItemDefault) && !(item instanceof PopoverItemHtml)) {
-    //       return;
-    //     }
-
-    //     if (item.hasChildren && item.isChildrenOpen) {
-    //       this.showNestedItems(item);
-    //     }
-    //   });
   }
 
   /**
@@ -84,7 +46,7 @@ export class PopoverSelect extends PopoverDesktop {
      */
     if (this.nestingLevel === 0) {
       this.nodes.popover.style.setProperty(
-        CSSVariables.InlinePopoverWidth,
+        css.popover,
         this.size.width + 'px'
       );
     }

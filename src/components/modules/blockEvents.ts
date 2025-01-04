@@ -210,9 +210,9 @@ export default class BlockEvents extends Module {
    * @param {KeyboardEvent} event - keydown
    */
   private tabPressed(event: KeyboardEvent): void {
-    const { InlineToolbar, Caret } = this.Editor;
+    const { InlineToolbar, Caret, TriggerInputTool } = this.Editor;
 
-    const isFlipperActivated = InlineToolbar.opened;
+    const isFlipperActivated = InlineToolbar.opened || TriggerInputTool.opened;
 
     if (isFlipperActivated) {
       return;
@@ -275,7 +275,7 @@ export default class BlockEvents extends Module {
    * @param event - keydown
    */
   private tagPressed(event: KeyboardEvent): void {
-    this.Editor.TriggerInputTool.tryToShow(event.key);
+    this.Editor.TriggerInputTool.tryToShow(event);
   }
 
   /**
@@ -295,6 +295,7 @@ export default class BlockEvents extends Module {
      * Don't handle Enter keydowns when Tool sets enableLineBreaks to true.
      * Uses for Tools like <code> where line breaks should be handled by default behaviour.
      */
+    // debugger;
     if (currentBlock.tool.isLineBreaksEnabled) {
       return;
     }
@@ -303,7 +304,7 @@ export default class BlockEvents extends Module {
      * Opened Toolbars uses Flipper with own Enter handling
      * Allow split block when no one button in Flipper is focused
      */
-    if (UI.someToolbarOpened && UI.someFlipperButtonFocused) {
+    if (UI.someToolbarOpened) {
       return;
     }
 

@@ -1,4 +1,7 @@
-import Paragraph from '@editorjs/paragraph';
+import Paragraph from '../block-tools/paragraph';
+import Header from '../block-tools/header';
+import ImageTool from '../block-tools/image';
+import EditorjsList from '../block-tools/list';
 import Module from '../__module';
 import * as _ from '../utils';
 import type { SanitizerConfig, ToolConfig, ToolConstructable, ToolSettings } from '../../../types';
@@ -222,6 +225,36 @@ export default class Tools extends Module {
       moveDown: {
         class: MoveDownTune,
         isInternal: true,
+      },
+      header: {
+        class: Header,
+        inlineToolbar: true,
+        config: {
+          placeholder: 'Enter a header',
+          levels: [1, 2, 3, 4, 5],
+          defaultLevel: 3,
+        },
+      },
+
+      /**
+       * Or pass class directly without any configuration
+       */
+      image: {
+        class: ImageTool,
+        config: {
+          endpoints: {
+            byFile: 'http://localhost:8008/uploadFile', // Your backend file uploader endpoint
+            byUrl: 'http://localhost:8008/fetchUrl', // Your endpoint that provides uploading by Url
+          },
+        },
+      },
+
+      list: {
+        class: EditorjsList,
+        inlineToolbar: true,
+        config: {
+          defaultStyle: 'unordered',
+        },
       },
     };
   }

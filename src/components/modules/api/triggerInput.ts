@@ -36,6 +36,6 @@ export default class TriggerInputAPI extends Module {
    * @param {TooltipOptions} options - tooltip options
    */
   public getTriggerRange(): Range |null {
-    return null;
+    return this.Editor.TriggerInputTool.getTriggerRange();
   }
 }

@@ -12,7 +12,7 @@ import type { Popover, PopoverItemHtmlParams, PopoverItemParams, WithChildren } 
 import { PopoverItemType } from '../../utils/popover';
 import { PopoverInline } from '../../utils/popover/popover-inline';
 import { PopoverSelect } from '../../utils/popover/popover-select';
-import { isPrintableKey } from '../../utils';
+import { isPrintableKey, keyCodes } from '../../utils';
 import { selectionChangeDebounceTimeout, triggertInputShowDebounceTimeout } from '../../constants';
 
 
@@ -108,9 +108,19 @@ export default class TriggerInputTool extends Module {
    * @param [needToClose] - pass true to close toolbar if it is not allowed.
    *                                  Avoid to use it just for closing IT, better call .close() clearly.
    * @param keycode
+   * @param event
    */
-  public async tryToShow(keycode: string): Promise<void> {
-    if (!this.allowedToShow(keycode)) {
+  public async tryToShow(event: KeyboardEvent): Promise<void> {
+    const ignoreKeys: number[] = [keyCodes.TAB,
+      keyCodes.UP,
+      keyCodes.DOWN,
+      keyCodes.ENTER];
+
+    // debugger;
+    if (ignoreKeys.includes(event.keyCode)) {
+      return;
+    }
+    if (!this.allowedToShow(event.key)) {
       this.close();
 
       return;
@@ -145,6 +155,13 @@ export default class TriggerInputTool extends Module {
 
     this.Editor.Toolbar.close();
     // debugger
+  }
+
+  /**
+   *
+   */
+  public getTriggerRange(): Range |null {
+    return this.currentTriggerInputRange;
   }
 
 
@@ -250,22 +267,20 @@ export default class TriggerInputTool extends Module {
 
 
     const popoverItems = [] as PopoverItemParams[];
-    const tool = currentBlock.tool.inlineTools.get('link');
+    const tool = currentBlock.tool.inlineTools.get('tag');
 
     if (tool === undefined) {
       return;
     }
 
     const instance = tool.create();
+
     // 获取渲染元素，可能多个
-    const renderedTool = await instance.render();
-
-    if (this.toolsInstances === null) {
-      this.toolsInstances = new Map();
+    if (instance && !( 'renderTrigger' in instance)) {
+      return;
     }
+    const renderedTool = await instance.renderTrigger();
 
-    // 写入当前工具实例
-    this.toolsInstances.set(tool.name, instance);
 
     const toolTitle = I18n.t(
       I18nInternalNS.toolNames,
@@ -275,24 +290,22 @@ export default class TriggerInputTool extends Module {
 
     [ renderedTool ].flat().forEach((item) => {
       // 写入当前元素
-      const commonPopoverItemParams = {
-        name: tool.name,
-        // 点击的时候执行的参数
-        onActivate: () => {
-          this.toolClicked(instance);
-        },
-        // 提示
-        hint: {
-          title: toolTitle,
-          description: '',
-        },
-        isFlippable: true,
-      } as PopoverItemParams;
+      // const commonPopoverItemParams = {
+      //   name: ,
+      //   // 点击的时候执行的参数
+      //   onActivate: () => {
+      //     this.toolClicked(instance);
+      //   },
+      //   // 提示
+      //   hint: {
+      //     title: toolTitle,
+      //     description: '',
+      //   },
+      //   isFlippable: true,
+      // } as PopoverItemParams;
       const popoverItem = {
-        ...commonPopoverItemParams,
-        element: item,
-        type: PopoverItemType.Html,
-
+        ...item,
+        type: PopoverItemType.Default,
       } as PopoverItemParams;
 
       popoverItems.push(popoverItem);
@@ -305,6 +318,8 @@ export default class TriggerInputTool extends Module {
         nothingFound: I18n.ui(I18nInternalNS.ui.popover, 'Nothing found'),
         search: I18n.ui(I18nInternalNS.ui.popover, 'Filter'),
       },
+      // searchable: true,
+      flippable: true,
     });
 
     this.move(this.popover.size.width);
